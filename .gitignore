@@ -1,11 +1,10 @@
-.idea/
-.vscode/
+programs/
+sample-data/
+tools/
+.venv/
 __pycache__/
 *.pyc
-.env
-.venv/
-venv/
-*.log
-.DS_Store
-Thumbs.db
-programs/
+.idea/
+# Local data
+ecm-platform/backend/data/input/*
+!ecm-platform/backend/data/input/.gitkeep
