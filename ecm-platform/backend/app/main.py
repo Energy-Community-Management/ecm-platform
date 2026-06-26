@@ -1,24 +1,29 @@
+import logging
 from pathlib import Path
 
 from app.imports.ote.parser import OTEParser
-from app.imports.ote.parser import parse_kwh
 
 
-def main():
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname)s: %(message)s",
+)
+
+logger = logging.getLogger(__name__)
+
+
+def main() -> None:
+    base_dir = Path(__file__).resolve().parents[1]
+    csv_file = base_dir / "data" / "input" / "pnd_export.csv"
 
     parser = OTEParser()
+    records = parser.load_records(csv_file)
 
-    BASE_DIR = Path(__file__).resolve().parents[1]
+    total_kwh = sum(record.value_kwh for record in records)
 
-    csv_file = BASE_DIR / "data" / "input" / "pnd_export.csv"
+    logger.info("Načteno záznamů: %d", len(records))
+    logger.info("Celkem energie: %.4f kWh", total_kwh)
 
-    rows = parser.load(csv_file)
-
-    print(len(rows))
-
-    print(rows[0])
-    energy = parse_kwh(rows[0]["Celkem v intervalu"])
-    print(energy)
 
 if __name__ == "__main__":
     main()
