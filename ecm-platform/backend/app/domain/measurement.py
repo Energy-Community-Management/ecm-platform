@@ -8,3 +8,4 @@ class EnergyMeasurement:
     end: datetime
     source: str
     value_kwh: float
+    status: str = ""
