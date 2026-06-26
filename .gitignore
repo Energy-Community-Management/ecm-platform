@@ -8,3 +8,5 @@ __pycache__/
 # Local data
 ecm-platform/backend/data/input/*
 !ecm-platform/backend/data/input/.gitkeep
+__pycache__/
+*.pyc

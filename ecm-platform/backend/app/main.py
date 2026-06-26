@@ -1,7 +1,7 @@
 from pathlib import Path
 import logging
 
-from app.imports.ote.parser import OTEParser
+from app.imports.parsers.ote.parser import OTEParser
 
 logging.basicConfig(
     level=logging.INFO,
@@ -17,7 +17,7 @@ def main():
 
     csv_file = (
             base_dir
-            / "data"
+            / "storage"
             / "input"
             / "pnd_export (15).csv"
     )

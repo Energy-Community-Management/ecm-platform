@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from app.core.energy_series import EnergySeries
+from app.domain.enums.energy_series import EnergySeries
 from app.imports.detector import ImportDetector
-from app.imports.ote.parser import OTEParser
+from app.imports.parsers.ote.parser import OTEParser
 
 
 class ImportManager:

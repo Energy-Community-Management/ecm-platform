@@ -2,9 +2,9 @@ from pathlib import Path
 from datetime import datetime, timedelta
 import csv
 
-from app.core.energy_series import EnergySeries
+from app.domain.enums.energy_series import EnergySeries
 from app.domain.measurement import EnergyMeasurement
-from app.shared.converters import parse_kwh, parse_kw
+from app.utils.converters import parse_kwh, parse_kw
 
 
 def parse_datetime(value: str) -> datetime:
