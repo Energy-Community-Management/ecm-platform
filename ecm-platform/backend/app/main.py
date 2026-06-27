@@ -1,35 +1,14 @@
-from pathlib import Path
-import logging
-
-from app.imports.parsers.ote.parser import OTEParser
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(levelname)s: %(message)s",
-)
-
-logger = logging.getLogger(__name__)
+from app.services.import_manager import ImportManager
 
 
-def main():
+def main() -> None:
+    print("=====================================")
+    print(" ECM - Energy Community Management")
+    print("=====================================")
 
-    base_dir = Path(__file__).resolve().parent.parent
+    manager = ImportManager()
 
-    csv_file = (
-            base_dir
-            / "storage"
-            / "input"
-            / "pnd_export (15).csv"
-    )
-
-    parser = OTEParser()
-
-    series = parser.load_15min_profile(csv_file)
-
-    logger.info("Počet měření: %d", series.count())
-    logger.info("Období: %s -> %s", series.start(), series.end())
-    logger.info("Celkem energie: %.4f kWh", series.total_energy())
-    logger.info("První měření: %s", series[0])
+    # TODO: Spuštění GUI / API / CLI
 
 
 if __name__ == "__main__":
