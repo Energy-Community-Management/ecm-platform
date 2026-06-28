@@ -1,2 +1,0 @@
-class MetadataService:
-    pass

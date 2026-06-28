@@ -1,9 +1,7 @@
 from pathlib import Path
 import logging
 
-from app.services.hash_service import HashService
-from app.services.import_id_service import ImportIdService
-from app.services.archive_service import ArchiveService
+from app.services.import_manager import ImportManager
 
 
 logging.basicConfig(
@@ -21,27 +19,19 @@ def main() -> None:
         base_dir
         / "storage"
         / "temp"
-        / "pnd_export (15).csv"
+        / "pnd_export (16).csv"
     )
 
-    storage_root = base_dir / "storage"
+    manager = ImportManager()
+    result = manager.import_file(source_file)
 
-    import_id_service = ImportIdService()
-    hash_service = HashService()
-    archive_service = ArchiveService(storage_root)
-
-    import_id = import_id_service.generate()
-    checksum = hash_service.calculate_sha256(source_file)
-
-    stored_file = archive_service.store_original(
-        source_file=source_file,
-        vendor="OTE",
-        import_id=import_id,
-    )
-
-    logger.info("Import ID: %s", import_id)
-    logger.info("SHA256: %s", checksum)
-    logger.info("Originál uložen: %s", stored_file)
+    logger.info("Import ID: %s", result.import_record.import_id)
+    logger.info("Vendor: %s", result.import_record.vendor.value)
+    logger.info("Typ dat: %s", result.import_record.data_type.value)
+    logger.info("Soubor: %s", result.import_record.original_file_name)
+    logger.info("SHA256: %s", result.import_record.checksum)
+    logger.info("Archiv: %s", result.import_record.stored_file_path)
+    logger.info("Počet měření: %d", len(result.measurements))
 
 
 if __name__ == "__main__":
