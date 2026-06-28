@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from app.domain.missing_interval import MissingInterval
+from app.quality.models.missing_interval import MissingInterval
 
 
 @dataclass(slots=True)

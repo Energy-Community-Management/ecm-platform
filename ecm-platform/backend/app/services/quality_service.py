@@ -1,13 +1,13 @@
 from datetime import timedelta
 
 from app.domain.energy_series import EnergySeries
-from app.domain.missing_interval import MissingInterval
-from app.domain.validation_report import ValidationReport
-from app.domain.enums.gap_reason import GapReason
-from app.domain.enums.validation_severity import ValidationSeverity
+from app.quality.models.missing_interval import MissingInterval
+from app.quality.models.validation_report import ValidationReport
+from app.quality.enums.gap_reason import GapReason
+from app.quality.enums.validation_severity import ValidationSeverity
 
 
-class EnergyValidationService:
+class QualityService:
     EXPECTED_INTERVAL = timedelta(minutes=15)
 
     def validate(self, series: EnergySeries) -> ValidationReport:

@@ -2,7 +2,7 @@ from pathlib import Path
 import logging
 
 from app.services.import_manager import ImportManager
-from app.services.energy_validation_service import EnergyValidationService
+from app.services.quality_service import QualityService
 
 
 logging.basicConfig(
@@ -14,18 +14,11 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-
     base_dir = Path(__file__).resolve().parents[1]
 
-    source_file = (
-        base_dir
-        / "storage"
-        / "temp"
-        / "pnd_export (16).csv"
-    )
+    source_file = base_dir / "storage" / "temp" / "pnd_export (16).csv"
 
     manager = ImportManager()
-
     result = manager.import_file(source_file)
 
     series = result.series
@@ -49,7 +42,6 @@ def main() -> None:
     logger.info("Počet měření: %d", series.count())
     logger.info("Začátek: %s", series.start())
     logger.info("Konec: %s", series.end())
-
     logger.info("Celkem energie: %.4f kWh", series.total_energy_kwh())
     logger.info("Průměr: %.4f kWh", series.average_energy_kwh())
     logger.info("Minimum: %.4f kWh", series.min_energy_kwh())
@@ -67,19 +59,15 @@ def main() -> None:
     logger.info("Počet měsíců: %d", len(monthly))
 
     first_day = next(iter(daily.items()))
-    logger.info(
-        "První den: %s = %.4f kWh",
-        first_day[0],
-        first_day[1],
-    )
+    logger.info("První den: %s = %.4f kWh", first_day[0], first_day[1])
 
     logger.info("")
     logger.info("=" * 60)
-    logger.info("VALIDACE")
+    logger.info("QUALITY")
     logger.info("=" * 60)
 
-    validator = EnergyValidationService()
-    report = validator.validate(series)
+    quality = QualityService()
+    report = quality.validate(series)
 
     logger.info("Completeness: %.2f %%", report.completeness)
     logger.info("Expected intervalů: %d", report.expected_intervals)

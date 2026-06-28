@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from app.domain.enums.gap_reason import GapReason
-from app.domain.enums.validation_severity import ValidationSeverity
+from app.quality.enums.gap_reason import GapReason
+from app.quality.enums.validation_severity import ValidationSeverity
 
 
 @dataclass(slots=True, frozen=True)
