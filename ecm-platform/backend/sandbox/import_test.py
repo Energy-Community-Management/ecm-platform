@@ -83,6 +83,8 @@ def main() -> None:
     missing = validator.find_missing_intervals(series)
 
     logger.info("Completeness: %.2f %%", validator.completeness(series))
+    logger.info("Expected intervalů: %d", validator.expected_intervals_count(series))
+    logger.info("Missing intervalů: %d", validator.missing_intervals_count(series))
     logger.info("Chybějící intervaly: %d", len(missing))
 
     if missing:
