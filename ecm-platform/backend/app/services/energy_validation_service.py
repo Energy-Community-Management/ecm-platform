@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from app.domain.energy_series import EnergySeries
+from app.domain.missing_interval import MissingInterval
 
 
 class EnergyValidationService:
@@ -8,8 +9,8 @@ class EnergyValidationService:
 
     EXPECTED_INTERVAL = timedelta(minutes=15)
 
-    def find_missing_intervals(self, series: EnergySeries) -> list[tuple]:
-        missing: list[tuple] = []
+    def find_missing_intervals(self, series: EnergySeries) -> list[MissingInterval]:
+        missing: list[MissingInterval] = []
 
         measurements = series.measurements
 
@@ -21,10 +22,10 @@ class EnergyValidationService:
 
             if current.start > expected_start:
                 missing.append(
-                    (
-                        previous.end,
-                        current.start,
-                        current.start - previous.end,
+                    MissingInterval(
+                        start=previous.end,
+                        end=current.start,
+                        duration=current.start - previous.end,
                     )
                 )
 
@@ -35,9 +36,9 @@ class EnergyValidationService:
 
         count = 0
 
-        for _, _, duration in missing:
+        for gap in missing:
             count += int(
-                duration.total_seconds()
+                gap.duration.total_seconds()
                 / self.EXPECTED_INTERVAL.total_seconds()
             )
 

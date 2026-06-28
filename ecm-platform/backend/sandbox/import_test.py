@@ -92,9 +92,9 @@ def main() -> None:
         gap = missing[0]
 
         logger.info("První nalezená mezera:")
-        logger.info("Od: %s", gap[0])
-        logger.info("Do: %s", gap[1])
-        logger.info("Délka: %s", gap[2])
+        logger.info("Od: %s", gap.start)
+        logger.info("Do: %s", gap.end)
+        logger.info("Délka: %s", gap.duration)
 
     else:
 
