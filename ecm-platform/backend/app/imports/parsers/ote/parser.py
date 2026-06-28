@@ -2,7 +2,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 import csv
 
-from app.domain.enums.energy_series import EnergySeries
+from app.domain.energy_series import EnergySeries
 from app.domain.measurement import EnergyMeasurement
 from app.utils.converters import parse_kwh, parse_kw
 
