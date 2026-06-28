@@ -72,5 +72,5 @@ class ImportManager:
 
         return ImportResult(
             import_record=import_record,
-            measurements=series.measurements,
+            series=series,
         )

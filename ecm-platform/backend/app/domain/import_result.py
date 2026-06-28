@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
 from app.domain.import_record import ImportRecord
-from app.domain.measurement import EnergyMeasurement
+from app.domain.energy_series import EnergySeries
 
 
 @dataclass(slots=True)
 class ImportResult:
     import_record: ImportRecord
-    measurements: list[EnergyMeasurement]
+    series: EnergySeries
