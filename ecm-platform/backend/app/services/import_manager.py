@@ -12,6 +12,7 @@ from app.services.archive_service import ArchiveService
 
 from app.imports.detector import ImportDetector
 from app.imports.parser_factory import ParserFactory
+from app.repositories.metadata_repository import MetadataRepository
 
 
 class ImportManager:
@@ -26,6 +27,7 @@ class ImportManager:
         self.detector = ImportDetector()
         self.parser_factory = ParserFactory()
         self.archive_service = ArchiveService(storage_root)
+        self.metadata_repository = MetadataRepository(storage_root)
 
     def import_file(self, file_path: Path) -> ImportResult:
         import_id = self.import_id_service.generate()
@@ -65,6 +67,8 @@ class ImportManager:
 
         import_record.records_count = series.count()
         import_record.status = ImportStatus.READY
+
+        self.metadata_repository.save(import_record)
 
         return ImportResult(
             import_record=import_record,
