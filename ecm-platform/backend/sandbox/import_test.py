@@ -79,25 +79,22 @@ def main() -> None:
     logger.info("=" * 60)
 
     validator = EnergyValidationService()
+    report = validator.validate(series)
 
-    missing = validator.find_missing_intervals(series)
+    logger.info("Completeness: %.2f %%", report.completeness)
+    logger.info("Expected intervalů: %d", report.expected_intervals)
+    logger.info("Missing intervalů: %d", report.missing_intervals_count)
+    logger.info("Chybějící mezery: %d", len(report.missing_intervals))
 
-    logger.info("Completeness: %.2f %%", validator.completeness(series))
-    logger.info("Expected intervalů: %d", validator.expected_intervals_count(series))
-    logger.info("Missing intervalů: %d", validator.missing_intervals_count(series))
-    logger.info("Chybějící intervaly: %d", len(missing))
-
-    if missing:
-
-        gap = missing[0]
-
+    if report.missing_intervals:
+        gap = report.missing_intervals[0]
         logger.info("První nalezená mezera:")
         logger.info("Od: %s", gap.start)
         logger.info("Do: %s", gap.end)
         logger.info("Délka: %s", gap.duration)
-
+        logger.info("Důvod: %s", gap.reason.value)
+        logger.info("Závažnost: %s", gap.severity.value)
     else:
-
         logger.info("Žádné chybějící intervaly.")
 
     logger.info("")
