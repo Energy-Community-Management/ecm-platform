@@ -31,6 +31,13 @@ def main() -> None:
     logger.info("Min kWh / interval: %.4f", result.series.min_energy_kwh())
     logger.info("Max kWh / interval: %.4f", result.series.max_energy_kwh())
 
+    daily = result.series.daily_totals()
+    monthly = result.series.monthly_totals()
+
+    logger.info("Počet dnů: %d", len(daily))
+    logger.info("Počet měsíců: %d", len(monthly))
+    logger.info("První den: %s = %.4f kWh", list(daily.keys())[0], list(daily.values())[0])
+    logger.info("Měsíce: %s", monthly)
 
 if __name__ == "__main__":
     main()
