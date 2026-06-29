@@ -1,91 +1,60 @@
-from datetime import timedelta
-
 from app.domain.energy_series import EnergySeries
-from app.quality.models.missing_interval import MissingInterval
 from app.quality.models.validation_report import ValidationReport
-from app.quality.enums.gap_reason import GapReason
-from app.quality.enums.validation_severity import ValidationSeverity
+from app.quality.rules.missing_interval_rule import MissingIntervalRule
 
 
 class QualityService:
-    EXPECTED_INTERVAL = timedelta(minutes=15)
 
-    def validate(self, series: EnergySeries) -> ValidationReport:
-        missing = self.find_missing_intervals(series)
+    def __init__(self) -> None:
 
-        expected = series.count() + self.missing_intervals_count(series)
-        missing_count = self.missing_intervals_count(series)
+        self.rules = [
+            MissingIntervalRule(),
+        ]
 
-        completeness = 100.0
-        if expected > 0:
-            completeness = round(series.count() / expected * 100, 2)
+    def validate(
+        self,
+        series: EnergySeries,
+    ) -> ValidationReport:
 
-        return ValidationReport(
-            completeness=completeness,
-            expected_intervals=expected,
-            missing_intervals_count=missing_count,
-            missing_intervals=missing,
+        report = ValidationReport(
+            completeness=100.0,
+            expected_intervals=0,
+            missing_intervals_count=0,
         )
 
-    def find_missing_intervals(self, series: EnergySeries) -> list[MissingInterval]:
-        missing: list[MissingInterval] = []
+        for rule in self.rules:
+            rule.validate(series, report)
 
-        measurements = series.measurements
+        self._calculate_statistics(series, report)
 
-        if len(measurements) < 2:
-            return missing
+        return report
 
-        for previous, current in zip(measurements, measurements[1:]):
-            expected_start = previous.end
+    def _calculate_statistics(
+        self,
+        series: EnergySeries,
+        report: ValidationReport,
+    ) -> None:
 
-            if current.start > expected_start:
-                duration = current.start - previous.end
-                reason = self._classify_gap(previous.end, current.start, duration)
+        missing_intervals = 0
 
-                missing.append(
-                    MissingInterval(
-                        start=previous.end,
-                        end=current.start,
-                        duration=duration,
-                        reason=reason,
-                        severity=self._severity_for_reason(reason),
-                    )
-                )
-
-        return missing
-
-    def missing_intervals_count(self, series: EnergySeries) -> int:
-        count = 0
-
-        for gap in self.find_missing_intervals(series):
-            count += int(
-                gap.duration.total_seconds()
-                / self.EXPECTED_INTERVAL.total_seconds()
+        for gap in report.missing_intervals:
+            missing_intervals += int(
+                gap.duration.total_seconds() / (15 * 60)
             )
 
-        return count
+        report.missing_intervals_count = missing_intervals
 
-    def _classify_gap(
-        self,
-        start,
-        end,
-        duration: timedelta,
-    ) -> GapReason:
-        if (
-            start.month == 3
-            and start.weekday() == 6
-            and start.hour == 1
-            and duration == timedelta(hours=1)
-        ):
-            return GapReason.DST_FORWARD
+        report.expected_intervals = (
+            series.count()
+            + missing_intervals
+        )
 
-        return GapReason.MISSING_DATA
-
-    def _severity_for_reason(
-        self,
-        reason: GapReason,
-    ) -> ValidationSeverity:
-        if reason is GapReason.DST_FORWARD:
-            return ValidationSeverity.INFO
-
-        return ValidationSeverity.WARNING
+        if report.expected_intervals == 0:
+            report.completeness = 100.0
+        else:
+            report.completeness = round(
+                series.count()
+                / report.expected_intervals
+                * 100,
+                2,
+            )
