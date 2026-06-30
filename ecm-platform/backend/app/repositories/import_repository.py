@@ -84,3 +84,55 @@ class ImportRepository:
             return None
 
         return ImportMapper.from_row(row)
+
+    def list(self) -> list[ImportRecord]:
+        with self.database.connect() as connection:
+            cursor = connection.execute(
+                """
+                SELECT
+                    id,
+                    vendor,
+                    data_type,
+                    file_format,
+                    checksum,
+                    original_file_name,
+                    stored_file_path,
+                    imported_at
+                FROM imports
+                ORDER BY imported_at DESC
+                """
+            )
+
+            rows = cursor.fetchall()
+
+        return [
+            ImportMapper.from_row(row)
+            for row in rows
+        ]
+
+    def get_by_id(self, import_id: str) -> ImportRecord | None:
+        with self.database.connect() as connection:
+            cursor = connection.execute(
+                """
+                SELECT
+                    id,
+                    vendor,
+                    data_type,
+                    file_format,
+                    checksum,
+                    original_file_name,
+                    stored_file_path,
+                    imported_at
+                FROM imports
+                WHERE id = ?
+                LIMIT 1
+                """,
+                (import_id,),
+            )
+
+            row = cursor.fetchone()
+
+        if row is None:
+            return None
+
+        return ImportMapper.from_row(row)

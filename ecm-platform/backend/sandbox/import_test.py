@@ -16,6 +16,41 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def log_import_history(repository_manager: RepositoryManager) -> None:
+    logger.info("")
+    logger.info("=" * 60)
+    logger.info("IMPORT HISTORY")
+    logger.info("=" * 60)
+
+    imports = repository_manager.list_imports()
+
+    logger.info("Počet importů: %d", len(imports))
+
+    for item in imports[:5]:
+        logger.info(
+            "%s | %s | %s | %s",
+            item.imported_at,
+            item.vendor.value,
+            item.data_type.value,
+            item.original_file_name,
+        )
+
+    if imports:
+        first_import = imports[0]
+        opened_import = repository_manager.get_import(first_import.import_id)
+
+        if opened_import:
+            logger.info("")
+            logger.info("=" * 60)
+            logger.info("OPEN IMPORT")
+            logger.info("=" * 60)
+            logger.info("Import ID: %s", opened_import.import_id)
+            logger.info("Soubor: %s", opened_import.original_file_name)
+            logger.info("Zdroj: %s", opened_import.vendor.value)
+            logger.info("Typ dat: %s", opened_import.data_type.value)
+            logger.info("Archiv: %s", opened_import.stored_file_path)
+
+
 def main() -> None:
     base_dir = Path(__file__).resolve().parents[1]
     source_file = base_dir / "storage" / "temp" / "pnd_export (17).csv"
@@ -44,6 +79,8 @@ def main() -> None:
         logger.warning("Importováno: %s", existing_import.imported_at)
         logger.warning("Archiv: %s", existing_import.stored_file_path)
         logger.warning("Vyber jiný soubor nebo otevři existující import.")
+
+        log_import_history(repository_manager)
         return
 
     saved_count = repository_manager.save_import_result(result)
@@ -113,6 +150,8 @@ def main() -> None:
         logger.info("Závažnost: %s", gap.severity.value)
     else:
         logger.info("Žádné chybějící intervaly.")
+
+    log_import_history(repository_manager)
 
     logger.info("")
     logger.info("=" * 60)

@@ -45,3 +45,9 @@ class RepositoryManager:
 
     def find_import_by_checksum(self, checksum: str):
         return self.import_repository.find_by_checksum(checksum)
+
+    def list_imports(self):
+        return self.import_repository.list()
+
+    def get_import(self, import_id: str):
+        return self.import_repository.get_by_id(import_id)
