@@ -3,6 +3,13 @@ import logging
 
 from app.services.import_manager import ImportManager
 from app.services.quality_service import QualityService
+from app.repositories.measurement_repository import MeasurementRepository
+from app.repositories.database import Database
+from app.repositories.schema import DatabaseSchema
+from app.repositories.import_repository import ImportRepository
+from app.repositories.meter_repository import MeterRepository
+from app.repositories.measurement_repository import MeasurementRepository
+
 
 
 logging.basicConfig(
@@ -21,19 +28,39 @@ def main() -> None:
     manager = ImportManager()
     result = manager.import_file(source_file)
 
+    database_path = base_dir / "storage" / "ecm.sqlite"
+
+    database = Database(database_path)
+    schema = DatabaseSchema(database)
+    schema.create()
+
+    import_repository = ImportRepository(database)
+    meter_repository = MeterRepository(database)
+    measurement_repository = MeasurementRepository(database)
+
+    # uloží metadata importu
+    import_repository.save(result.import_record)
+
+    # získá nebo vytvoří měřidlo
+    meter_id = meter_repository.get_or_create(
+        source=result.series.first().source,
+        unit="kWh",
+    )
+
+    # uloží měření
+    saved_count = measurement_repository.save_series(
+        import_id=result.import_record.import_id,
+        meter_id=meter_id,
+        series=result.series,
+    )
+
+    db_total = measurement_repository.total_energy_by_import(
+        result.import_record.import_id
+    )
+
+    logger.info("Uloženo měření do DB: %d", saved_count)
+    logger.info("Součet z DB: %.4f kWh", db_total)
     series = result.series
-
-    logger.info("=" * 60)
-    logger.info("IMPORT")
-    logger.info("=" * 60)
-
-    logger.info("Import ID: %s", result.import_record.import_id)
-    logger.info("Vendor: %s", result.import_record.vendor.value)
-    logger.info("Typ dat: %s", result.import_record.data_type.value)
-    logger.info("Soubor: %s", result.import_record.original_file_name)
-    logger.info("SHA256: %s", result.import_record.checksum)
-    logger.info("Archiv: %s", result.import_record.stored_file_path)
-
     logger.info("")
     logger.info("=" * 60)
     logger.info("ENERGY SERIES")
