@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 def main() -> None:
     base_dir = Path(__file__).resolve().parents[1]
 
-    source_file = base_dir / "storage" / "temp" / "pnd_export (16).csv"
+    source_file = base_dir / "storage" / "temp" / "pnd_export (17).csv"
 
     manager = ImportManager()
     result = manager.import_file(source_file)
