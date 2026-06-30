@@ -1,5 +1,8 @@
 from app.domain.energy_series import EnergySeries
 from app.repositories.database import Database
+from datetime import datetime
+from app.domain.measurement import EnergyMeasurement
+from app.domain.energy_series import EnergySeries
 
 
 class MeasurementRepository:
@@ -59,3 +62,36 @@ class MeasurementRepository:
             )
 
             return float(cursor.fetchone()[0])
+
+    def load_series_by_import(self, import_id: str) -> EnergySeries:
+        with self.database.connect() as connection:
+            cursor = connection.execute(
+                """
+                SELECT
+                    m.source,
+                    me.start_time,
+                    me.end_time,
+                    me.value_kwh,
+                    me.status
+                FROM measurements me
+                JOIN meters m ON m.id = me.meter_id
+                WHERE me.import_id = ?
+                ORDER BY me.start_time
+                """,
+                (import_id,),
+            )
+
+            rows = cursor.fetchall()
+
+        measurements = [
+            EnergyMeasurement(
+                start=datetime.fromisoformat(row[1]),
+                end=datetime.fromisoformat(row[2]),
+                source=row[0],
+                value_kwh=row[3],
+                status=row[4],
+            )
+            for row in rows
+        ]
+
+        return EnergySeries(measurements)

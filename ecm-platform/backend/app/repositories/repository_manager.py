@@ -3,6 +3,13 @@ from app.repositories.database import Database
 from app.repositories.import_repository import ImportRepository
 from app.repositories.meter_repository import MeterRepository
 from app.repositories.measurement_repository import MeasurementRepository
+from datetime import datetime
+
+from app.domain.import_record import ImportRecord
+from app.domain.enums.vendor import Vendor
+from app.domain.enums.data_type import DataType
+from app.domain.enums.file_format import FileFormat
+from app.domain.enums.import_status import ImportStatus
 
 
 class RepositoryManager:
@@ -32,3 +39,9 @@ class RepositoryManager:
 
     def import_exists_by_checksum(self, checksum: str) -> bool:
         return self.import_repository.exists_by_checksum(checksum)
+
+    def load_series_by_import(self, import_id: str):
+        return self.measurement_repository.load_series_by_import(import_id)
+
+    def find_import_by_checksum(self, checksum: str):
+        return self.import_repository.find_by_checksum(checksum)

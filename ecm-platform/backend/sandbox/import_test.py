@@ -8,7 +8,6 @@ from app.repositories.schema import DatabaseSchema
 from app.repositories.repository_manager import RepositoryManager
 
 
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(levelname)s: %(message)s",
@@ -19,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 def main() -> None:
     base_dir = Path(__file__).resolve().parents[1]
-
     source_file = base_dir / "storage" / "temp" / "pnd_export (17).csv"
 
     manager = ImportManager()
@@ -33,8 +31,19 @@ def main() -> None:
 
     repository_manager = RepositoryManager(database)
 
-    if repository_manager.import_exists_by_checksum(result.import_record.checksum):
-        logger.warning("Tento soubor už byl importován. Import se ukončuje.")
+    existing_import = repository_manager.find_import_by_checksum(
+        result.import_record.checksum
+    )
+
+    if existing_import:
+        logger.warning("Tento soubor už byl importován.")
+        logger.warning("Import ID: %s", existing_import.import_id)
+        logger.warning("Soubor: %s", existing_import.original_file_name)
+        logger.warning("Zdroj: %s", existing_import.vendor.value)
+        logger.warning("Typ dat: %s", existing_import.data_type.value)
+        logger.warning("Importováno: %s", existing_import.imported_at)
+        logger.warning("Archiv: %s", existing_import.stored_file_path)
+        logger.warning("Vyber jiný soubor nebo otevři existující import.")
         return
 
     saved_count = repository_manager.save_import_result(result)
@@ -43,9 +52,17 @@ def main() -> None:
         result.import_record.import_id
     )
 
+    loaded_series = repository_manager.load_series_by_import(
+        result.import_record.import_id
+    )
+
     logger.info("Uloženo měření do DB: %d", saved_count)
     logger.info("Součet z DB: %.4f kWh", db_total)
+    logger.info("Načteno z DB: %d měření", loaded_series.count())
+    logger.info("Součet načtený z DB: %.4f kWh", loaded_series.total_energy_kwh())
+
     series = result.series
+
     logger.info("")
     logger.info("=" * 60)
     logger.info("ENERGY SERIES")
