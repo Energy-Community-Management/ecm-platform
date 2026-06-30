@@ -3,12 +3,9 @@ import logging
 
 from app.services.import_manager import ImportManager
 from app.services.quality_service import QualityService
-from app.repositories.measurement_repository import MeasurementRepository
 from app.repositories.database import Database
 from app.repositories.schema import DatabaseSchema
-from app.repositories.import_repository import ImportRepository
-from app.repositories.meter_repository import MeterRepository
-from app.repositories.measurement_repository import MeasurementRepository
+from app.repositories.repository_manager import RepositoryManager
 
 
 
@@ -34,27 +31,11 @@ def main() -> None:
     schema = DatabaseSchema(database)
     schema.create()
 
-    import_repository = ImportRepository(database)
-    meter_repository = MeterRepository(database)
-    measurement_repository = MeasurementRepository(database)
+    repository_manager = RepositoryManager(database)
 
-    # uloží metadata importu
-    import_repository.save(result.import_record)
+    saved_count = repository_manager.save_import_result(result)
 
-    # získá nebo vytvoří měřidlo
-    meter_id = meter_repository.get_or_create(
-        source=result.series.first().source,
-        unit="kWh",
-    )
-
-    # uloží měření
-    saved_count = measurement_repository.save_series(
-        import_id=result.import_record.import_id,
-        meter_id=meter_id,
-        series=result.series,
-    )
-
-    db_total = measurement_repository.total_energy_by_import(
+    db_total = repository_manager.total_energy_by_import(
         result.import_record.import_id
     )
 
