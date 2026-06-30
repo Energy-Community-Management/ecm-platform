@@ -5,6 +5,9 @@ from app.domain.enums.vendor import Vendor
 from app.domain.enums.data_type import DataType
 from app.domain.enums.file_format import FileFormat
 from app.domain.enums.import_status import ImportStatus
+from app.domain.import_record import ImportRecord
+from app.repositories.database import Database
+from app.mappers.import_mapper import ImportMapper
 
 
 class ImportRepository:
@@ -80,15 +83,4 @@ class ImportRepository:
         if row is None:
             return None
 
-        return ImportRecord(
-            import_id=row[0],
-            vendor=Vendor(row[1]),
-            data_type=DataType(row[2]),
-            file_format=FileFormat(row[3]),
-            status=ImportStatus.READY,
-            original_file_name=row[5],
-            original_file_path=row[5],
-            stored_file_path=row[6],
-            checksum=row[4],
-            imported_at=datetime.fromisoformat(row[7]),
-        )
+        return ImportMapper.from_row(row)
