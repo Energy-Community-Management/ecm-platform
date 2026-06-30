@@ -35,3 +35,17 @@ class ImportRepository:
                     import_record.imported_at.isoformat(),
                 ),
             )
+
+    def exists_by_checksum(self, checksum: str) -> bool:
+        with self.database.connect() as connection:
+            cursor = connection.execute(
+                """
+                SELECT 1
+                FROM imports
+                WHERE checksum = ?
+                LIMIT 1
+                """,
+                (checksum,),
+            )
+
+            return cursor.fetchone() is not None

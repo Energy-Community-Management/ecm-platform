@@ -33,6 +33,10 @@ def main() -> None:
 
     repository_manager = RepositoryManager(database)
 
+    if repository_manager.import_exists_by_checksum(result.import_record.checksum):
+        logger.warning("Tento soubor už byl importován. Import se ukončuje.")
+        return
+
     saved_count = repository_manager.save_import_result(result)
 
     db_total = repository_manager.total_energy_by_import(

@@ -29,3 +29,6 @@ class RepositoryManager:
 
     def total_energy_by_import(self, import_id: str) -> float:
         return self.measurement_repository.total_energy_by_import(import_id)
+
+    def import_exists_by_checksum(self, checksum: str) -> bool:
+        return self.import_repository.exists_by_checksum(checksum)
