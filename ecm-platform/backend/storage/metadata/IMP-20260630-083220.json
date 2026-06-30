@@ -1,0 +1,14 @@
+{
+    "import_id": "IMP-20260630-083220",
+    "vendor": "OTE",
+    "data_type": "PROFILE_15MIN",
+    "file_format": "CSV",
+    "status": "READY",
+    "original_file_name": "pnd_export (16).csv",
+    "original_file_path": "D:\\Projects\\ECM\\ecm-platform\\backend\\storage\\temp\\pnd_export (16).csv",
+    "stored_file_path": "D:\\Projects\\ECM\\ecm-platform\\backend\\storage\\original\\ote\\2026\\06\\30\\IMP-20260630-083220\\pnd_export (16).csv",
+    "checksum": "453680c73b4afb6470e3e7a86f6f36675375500705f90956af8f1e2357d843b0",
+    "imported_at": "2026-06-30T08:32:20.624449",
+    "records_count": 34944,
+    "error_message": ""
+}
