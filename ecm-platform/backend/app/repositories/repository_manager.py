@@ -51,3 +51,6 @@ class RepositoryManager:
 
     def get_import(self, import_id: str):
         return self.import_repository.get_by_id(import_id)
+
+    def load_series(self, import_id: str):
+        return self.measurement_repository.load_series_by_import(import_id)

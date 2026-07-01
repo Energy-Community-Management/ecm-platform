@@ -3,6 +3,7 @@ import logging
 
 from app.services.import_manager import ImportManager
 from app.services.quality_service import QualityService
+from app.services.import_summary_service import ImportSummaryService
 from app.repositories.database import Database
 from app.repositories.schema import DatabaseSchema
 from app.repositories.repository_manager import RepositoryManager
@@ -23,7 +24,6 @@ def log_import_history(repository_manager: RepositoryManager) -> None:
     logger.info("=" * 60)
 
     imports = repository_manager.list_imports()
-
     logger.info("Počet importů: %d", len(imports))
 
     for item in imports[:5]:
@@ -35,20 +35,34 @@ def log_import_history(repository_manager: RepositoryManager) -> None:
             item.original_file_name,
         )
 
-    if imports:
-        first_import = imports[0]
-        opened_import = repository_manager.get_import(first_import.import_id)
 
-        if opened_import:
-            logger.info("")
-            logger.info("=" * 60)
-            logger.info("OPEN IMPORT")
-            logger.info("=" * 60)
-            logger.info("Import ID: %s", opened_import.import_id)
-            logger.info("Soubor: %s", opened_import.original_file_name)
-            logger.info("Zdroj: %s", opened_import.vendor.value)
-            logger.info("Typ dat: %s", opened_import.data_type.value)
-            logger.info("Archiv: %s", opened_import.stored_file_path)
+def log_import_summary(
+    repository_manager: RepositoryManager,
+    import_id: str,
+) -> None:
+    summary_service = ImportSummaryService(
+        repository_manager=repository_manager,
+        quality_service=QualityService(),
+    )
+
+    summary = summary_service.build(import_id)
+
+    logger.info("")
+    logger.info("=" * 60)
+    logger.info("IMPORT SUMMARY")
+    logger.info("=" * 60)
+    logger.info("Import ID: %s", summary.import_id)
+    logger.info("Soubor: %s", summary.original_file_name)
+    logger.info("Zdroj: %s", summary.vendor.value)
+    logger.info("Typ dat: %s", summary.data_type.value)
+    logger.info("Importováno: %s", summary.imported_at)
+    logger.info("Počet měření: %d", summary.measurements)
+    logger.info("Celkem energie: %.4f kWh", summary.total_energy_kwh)
+    logger.info("Období: %s -> %s", summary.start_time, summary.end_time)
+    logger.info("Completeness: %.2f %%", summary.completeness)
+    logger.info("Chybějící mezery: %d", summary.missing_intervals)
+    logger.info("Warnings: %d", summary.warnings)
+    logger.info("Errors: %d", summary.errors)
 
 
 def main() -> None:
@@ -80,6 +94,18 @@ def main() -> None:
         logger.warning("Archiv: %s", existing_import.stored_file_path)
         logger.warning("Vyber jiný soubor nebo otevři existující import.")
 
+        loaded_series = repository_manager.load_series(existing_import.import_id)
+
+        logger.info("")
+        logger.info("=" * 60)
+        logger.info("OPEN EXISTING SERIES")
+        logger.info("=" * 60)
+        logger.info("Načteno měření: %d", loaded_series.count())
+        logger.info("Celkem energie: %.4f kWh", loaded_series.total_energy_kwh())
+        logger.info("Začátek: %s", loaded_series.start())
+        logger.info("Konec: %s", loaded_series.end())
+
+        log_import_summary(repository_manager, existing_import.import_id)
         log_import_history(repository_manager)
         return
 
@@ -89,9 +115,7 @@ def main() -> None:
         result.import_record.import_id
     )
 
-    loaded_series = repository_manager.load_series_by_import(
-        result.import_record.import_id
-    )
+    loaded_series = repository_manager.load_series(result.import_record.import_id)
 
     logger.info("Uloženo měření do DB: %d", saved_count)
     logger.info("Součet z DB: %.4f kWh", db_total)
@@ -151,6 +175,7 @@ def main() -> None:
     else:
         logger.info("Žádné chybějící intervaly.")
 
+    log_import_summary(repository_manager, result.import_record.import_id)
     log_import_history(repository_manager)
 
     logger.info("")
