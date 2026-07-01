@@ -33,3 +33,26 @@ class MeterRepository:
             )
 
             return cursor.lastrowid
+
+    def cleanup_unused(
+            self,
+            connection=None,
+    ) -> int:
+        active_connection = connection or self.database.connect()
+
+        try:
+            cursor = active_connection.execute(
+                """
+                DELETE FROM meters
+                WHERE id NOT IN (
+                    SELECT DISTINCT meter_id
+                    FROM measurements
+                )
+                """
+            )
+
+            return cursor.rowcount
+
+        finally:
+            if connection is None:
+                active_connection.close()

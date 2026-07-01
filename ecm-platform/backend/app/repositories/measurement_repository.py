@@ -95,3 +95,25 @@ class MeasurementRepository:
         ]
 
         return EnergySeries(measurements)
+
+    def delete_by_import(
+            self,
+            import_id: str,
+            connection=None,
+    ) -> int:
+        active_connection = connection or self.database.connect()
+
+        try:
+            cursor = active_connection.execute(
+                """
+                DELETE FROM measurements
+                WHERE import_id = ?
+                """,
+                (import_id,),
+            )
+
+            return cursor.rowcount
+
+        finally:
+            if connection is None:
+                active_connection.close()

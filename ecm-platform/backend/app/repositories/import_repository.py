@@ -141,3 +141,43 @@ class ImportRepository:
             return None
 
         return ImportMapper.from_row(row)
+
+    def update_status(
+            self,
+            import_id: str,
+            status,
+    ) -> None:
+        with self.database.connect() as connection:
+            connection.execute(
+                """
+                UPDATE imports
+                SET status = ?
+                WHERE id = ?
+                """,
+                (
+                    status.value,
+                    import_id,
+                ),
+            )
+
+    def delete(
+            self,
+            import_id: str,
+            connection=None,
+    ) -> int:
+        active_connection = connection or self.database.connect()
+
+        try:
+            cursor = active_connection.execute(
+                """
+                DELETE FROM imports
+                WHERE id = ?
+                """,
+                (import_id,),
+            )
+
+            return cursor.rowcount
+
+        finally:
+            if connection is None:
+                active_connection.close()
