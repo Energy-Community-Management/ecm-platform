@@ -33,9 +33,10 @@ def main() -> None:
 
     for item in imports:
         logger.info(
-            "%s | %s | %s | %s | %s",
+            "%s | %s | %s | %s | %s | %s",
             item.imported_at,
             item.import_id,
+            item.status.value,
             item.vendor.value,
             item.data_type.value,
             item.original_file_name,

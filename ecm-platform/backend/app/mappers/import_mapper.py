@@ -18,10 +18,10 @@ class ImportMapper:
             vendor=Vendor(row[1]),
             data_type=DataType(row[2]),
             file_format=FileFormat(row[3]),
-            status=ImportStatus.READY,
+            checksum=row[4],
             original_file_name=row[5],
             original_file_path=Path(row[5]),
             stored_file_path=Path(row[6]),
-            checksum=row[4],
             imported_at=datetime.fromisoformat(row[7]),
+            status=ImportStatus(row[8]),
         )

@@ -18,7 +18,8 @@ class DatabaseSchema:
                     checksum TEXT NOT NULL,
                     original_file_name TEXT NOT NULL,
                     stored_file_path TEXT NOT NULL,
-                    imported_at TEXT NOT NULL
+                    imported_at TEXT NOT NULL,
+                    status TEXT NOT NULL DEFAULT 'ACTIVE'
                 )
             """)
 
@@ -54,3 +55,14 @@ class DatabaseSchema:
                 CREATE INDEX IF NOT EXISTS idx_measurements_meter_time
                 ON measurements(meter_id, start_time)
             """)
+
+            self._ensure_import_status_column(connection)
+
+    def _ensure_import_status_column(self, connection) -> None:
+        cursor = connection.execute("PRAGMA table_info(imports)")
+        columns = [row[1] for row in cursor.fetchall()]
+
+        if "status" not in columns:
+            connection.execute(
+                "ALTER TABLE imports ADD COLUMN status TEXT NOT NULL DEFAULT 'ACTIVE'"
+            )

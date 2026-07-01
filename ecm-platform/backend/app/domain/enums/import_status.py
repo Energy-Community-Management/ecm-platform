@@ -2,12 +2,7 @@ from enum import Enum
 
 
 class ImportStatus(Enum):
-    RECEIVED = "RECEIVED"
-
-    VALIDATED = "VALIDATED"
-
-    PROCESSED = "PROCESSED"
-
-    READY = "READY"
-
+    IMPORTING = "IMPORTING"
+    ACTIVE = "ACTIVE"
+    ARCHIVED = "ARCHIVED"
     FAILED = "FAILED"

@@ -21,16 +21,17 @@ class ImportRepository:
             connection.execute(
                 """
                 INSERT OR IGNORE INTO imports (
-                    id,
-                    vendor,
-                    data_type,
-                    file_format,
-                    checksum,
-                    original_file_name,
-                    stored_file_path,
-                    imported_at
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                id,
+                vendor,
+                data_type,
+                file_format,
+                checksum,
+                original_file_name,
+                stored_file_path,
+                imported_at,    
+                status
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     import_record.import_id,
@@ -41,6 +42,7 @@ class ImportRepository:
                     import_record.original_file_name,
                     str(import_record.stored_file_path),
                     import_record.imported_at.isoformat(),
+                    import_record.status.value,
                 ),
             )
 
@@ -70,7 +72,8 @@ class ImportRepository:
                     checksum,
                     original_file_name,
                     stored_file_path,
-                    imported_at
+                    imported_at,
+                    status
                 FROM imports
                 WHERE checksum = ?
                 LIMIT 1
@@ -89,7 +92,7 @@ class ImportRepository:
         with self.database.connect() as connection:
             cursor = connection.execute(
                 """
-                SELECT
+                 SELECT
                     id,
                     vendor,
                     data_type,
@@ -97,7 +100,8 @@ class ImportRepository:
                     checksum,
                     original_file_name,
                     stored_file_path,
-                    imported_at
+                    imported_at,
+                    status
                 FROM imports
                 ORDER BY imported_at DESC
                 """
@@ -122,7 +126,8 @@ class ImportRepository:
                     checksum,
                     original_file_name,
                     stored_file_path,
-                    imported_at
+                    imported_at,
+                    status
                 FROM imports
                 WHERE id = ?
                 LIMIT 1
